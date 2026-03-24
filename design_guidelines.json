@@ -1,0 +1,185 @@
+{
+  "brand_identity": {
+    "name": "CreatorFlow",
+    "tagline": "One Link. Infinite Income.",
+    "mission": "Empower creators with a unified platform for commerce, brand deals, and analytics.",
+    "emotional_archetype": "Electric & Neon (Future, Speed, Disruption)",
+    "tone": "High-Energy, Professional, Futuristic, Empowering",
+    "theme": "Dark Mode Default"
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Space Grotesk, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "typesetting_rules": {
+      "headings": {
+        "weight": "font-bold",
+        "tracking": "tracking-tight",
+        "line_height": "leading-none",
+        "transform": "uppercase (selective for very large display text)"
+      },
+      "body": {
+        "weight": "font-normal",
+        "tracking": "tracking-normal",
+        "line_height": "leading-relaxed"
+      },
+      "overline": {
+        "transform": "uppercase",
+        "tracking": "tracking-[0.2em]",
+        "size": "text-xs",
+        "weight": "font-bold",
+        "color": "text-accent"
+      }
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": "#6C5CE7",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#00D9FF",
+      "secondary_foreground": "#000000",
+      "accent": "#FF6B6B",
+      "accent_foreground": "#FFFFFF",
+      "background": "#0D0D1A",
+      "card": "#1A1A2E",
+      "card_foreground": "#FFFFFF",
+      "border": "#2D2D44",
+      "muted": "#8A8AA3",
+      "success": "#00E676",
+      "warning": "#FFEA00"
+    },
+    "gradients": {
+      "primary_glow": "bg-gradient-to-r from-[#6C5CE7] to-[#a39aff]",
+      "secondary_glow": "bg-gradient-to-r from-[#00D9FF] to-[#00b8d4]",
+      "accent_glow": "bg-gradient-to-r from-[#FF6B6B] to-[#ff4757]",
+      "glass_surface": "bg-white/5 backdrop-blur-xl border-white/10",
+      "glass_surface_hover": "hover:bg-white/10 transition-colors duration-300"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "strategy": "Crystal Glass",
+      "classes": "bg-[#1A1A2E]/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)]",
+      "usage": "Cards, Floating Nav, Modals, Toasts"
+    },
+    "neon_glow": {
+      "text_glow": "drop-shadow-[0_0_10px_rgba(108,92,231,0.5)]",
+      "border_glow": "shadow-[0_0_15px_rgba(0,217,255,0.3)]",
+      "usage": "Active states, Primary CTAs, Key Metrics"
+    },
+    "micro_interactions": {
+      "hover": "scale-[1.02] transition-transform duration-200 ease-out",
+      "click": "scale-[0.98]",
+      "focus": "ring-2 ring-primary ring-offset-2 ring-offset-background"
+    },
+    "textures": {
+      "background_noise": "opacity-5 mix-blend-overlay fixed inset-0 pointer-events-none z-0 url('https://grainy-gradients.vercel.app/noise.svg')"
+    }
+  },
+  "layout_strategies": {
+    "landing_page": {
+      "grid_type": "Tetris Grid (Mode A)",
+      "container_classes": "container mx-auto px-4 sm:px-6 lg:px-8",
+      "section_spacing": "py-24 or py-32",
+      "alignment": "Asymmetrical, Alternating Layouts"
+    },
+    "dashboard": {
+      "grid_type": "High Density Grid (Mode B)",
+      "container_classes": "w-full p-6",
+      "gap": "gap-6",
+      "card_style": "Flat, Rectangular, No large border-radius (rounded-lg max)"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-white hover:bg-primary/90 shadow-[0_0_20px_rgba(108,92,231,0.4)] rounded-full px-8 py-3 font-bold tracking-wide transition-all",
+      "secondary": "bg-transparent border border-white/20 text-white hover:bg-white/10 rounded-full px-8 py-3 font-medium transition-all",
+      "ghost": "text-muted hover:text-white hover:bg-white/5 rounded-lg px-4 py-2 transition-colors"
+    },
+    "cards": {
+      "base": "bg-card/50 border border-white/5 rounded-xl backdrop-blur-md p-6 relative overflow-hidden group",
+      "hover_effect": "hover:border-primary/50 hover:shadow-[0_0_30px_rgba(108,92,231,0.1)] transition-all duration-300"
+    },
+    "charts": {
+      "library": "Recharts (via Shadcn)",
+      "theme": "Dark Mode Optimized",
+      "colors": ["#6C5CE7", "#00D9FF", "#FF6B6B", "#00E676", "#FFEA00"],
+      "style": "Minimalist, no grid lines, glowing strokes"
+    }
+  },
+  "image_urls": {
+    "creator_portraits": [
+      {
+        "url": "https://images.pexels.com/photos/7676395/pexels-photo-7676395.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Vlogger filming with ring light in neon room",
+        "category": "Hero/Testimonials"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1699767592631-2e22cb9c0df8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxpbmZsdWVuY2VyJTIwcmVjb3JkaW5nJTIwdmlkZW8lMjBzdHVkaW8lMjBuZW9uJTIwbGlnaHRpbmd8ZW58MHx8fHwxNzc0MzQwMDc4fDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Camera setup in dark studio",
+        "category": "Behind the scenes"
+      },
+      {
+        "url": "https://images.pexels.com/photos/7676403/pexels-photo-7676403.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Influencer setting up lights",
+        "category": "Creator Dashboard"
+      }
+    ],
+    "abstract_backgrounds": [
+      {
+        "url": "https://images.pexels.com/photos/31032751/pexels-photo-31032751.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Dynamic abstract neon art",
+        "category": "Hero Background"
+      },
+      {
+        "url": "https://images.pexels.com/photos/28408920/pexels-photo-28408920.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "3D spheres with neon hues",
+        "category": "Feature Cards"
+      }
+    ],
+    "brand_logos": [
+      {
+        "url": "https://images.unsplash.com/photo-1686140386811-099f53c0dd54?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwyfHx0ZWNoJTIwc3RhcnR1cCUyMGxvZ28lMjBpY29uJTIwbW9kZXJuJTIwbWluaW1hbCUyMHZlY3RvcnxlbnwwfHx8fDE3NzQzNDAwODh8MA&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract P Logo",
+        "category": "Sponsors"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1663992051824-f82c1720785a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHw0fHx0ZWNoJTIwc3RhcnR1cCUyMGxvZ28lMjBpY29uJTIwbW9kZXJuJTIwbWluaW1hbCUyMHZlY3RvcnxlbnwwfHx8fDE3NzQzNDAwODh8MA&ixlib=rb-4.1.0&q=85",
+        "alt": "Minimalist Icon",
+        "category": "Sponsors"
+      }
+    ],
+    "digital_products": [
+      {
+        "url": "https://images.unsplash.com/photo-1654783912259-659d94fff000?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwY291cnNlJTIwY292ZXIlMjBhcnQlMjAzZCUyMGFic3RyYWN0JTIwZmxvYXRpbmclMjBib29rfGVufDB8fHx8MTc3NDM0MDA4OHww&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract blue wavy sculpture",
+        "category": "Store Product"
+      },
+      {
+        "url": "https://images.pexels.com/photos/29652321/pexels-photo-29652321.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "3D cylindrical shapes",
+        "category": "Store Product"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Update tailwind.config.js to include the specific neon color palette and 'Space Grotesk' font family. Install 'react-icons' or '@phosphor-icons/react' for iconography.",
+    "2. THEME: Ensure 'dark' class is applied to the html/body by default. The entire app is dark mode.",
+    "3. GLASSMORPHISM: Do not use standard white cards. Use the provided 'glass_surface' classes for all cards in the dashboard and landing page.",
+    "4. LAYOUT: For the Landing Page, break the grid. Do not use 3 equal columns. Use a 'Bento' style mixed grid (span-2, span-1).",
+    "5. CHARTS: Use Recharts with custom tooltips that match the glassmorphism style (dark blurred background).",
+    "6. MICRO-ANIMATIONS: Wrap page transitions in 'AnimatePresence' (Framer Motion). Add hover scales to all cards.",
+    "7. IMAGES: Use the provided URLs for specific sections. Do not leave placeholders.",
+    "8. STORE BUILDER: The 'Drag-drop' interface should use a distinct visual style (e.g., dotted grid background) to signify it's an editor workspace.",
+    "9. TESTING: Add 'data-testid' to all buttons, inputs, and links."
+  ],
+  "universal_guidelines": [
+    "Avoid 'AI Slop' (generic centered layouts).",
+    "Use z-index hierarchy to create depth.",
+    "No transparent backgrounds on headers without blur.",
+    "Buttons must be pill-shaped or sharp-edged, never default rounded.",
+    "Scrollbars must be customized (thin, dark)."
+  ]
+}
