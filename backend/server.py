@@ -1,14 +1,18 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, File, UploadFile, Query, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import requests
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Dict, Any
 import uuid
+import random
+import string
 from datetime import datetime, timezone, timedelta
 import jwt
 import bcrypt
@@ -30,9 +34,82 @@ JWT_EXPIRATION_HOURS = 24
 # Stripe Configuration
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
 
+# Object Storage Configuration
+STORAGE_URL = "https://integrations.emergentagent.com/objstore/api/v1/storage"
+EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+APP_NAME = "creatorflow"
+storage_key = None
+
+# Social OAuth Configuration
+YOUTUBE_CLIENT_ID = os.environ.get('YOUTUBE_CLIENT_ID', '')
+YOUTUBE_CLIENT_SECRET = os.environ.get('YOUTUBE_CLIENT_SECRET', '')
+INSTAGRAM_CLIENT_ID = os.environ.get('INSTAGRAM_CLIENT_ID', '')
+INSTAGRAM_CLIENT_SECRET = os.environ.get('INSTAGRAM_CLIENT_SECRET', '')
+TIKTOK_CLIENT_KEY = os.environ.get('TIKTOK_CLIENT_KEY', '')
+TIKTOK_CLIENT_SECRET = os.environ.get('TIKTOK_CLIENT_SECRET', '')
+
+# Referral Configuration
+REFERRAL_SIGNUP_BONUS = 5.0  # $5 per signup
+REFERRAL_EARNING_PERCENTAGE = 0.10  # 10% of earnings for 12 months
+REFERRAL_MILESTONES = {
+    5: 25.0,   # 5 referrals = $25 bonus
+    10: 75.0,  # 10 referrals = $75 bonus
+    25: 200.0, # 25 referrals = $200 bonus
+    50: 500.0, # 50 referrals = $500 bonus
+    100: 1000.0 # 100 referrals = $1000 bonus
+}
+
 app = FastAPI(title="CreatorFlow API")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
+
+# ==================== STORAGE HELPERS ====================
+
+def init_storage():
+    """Initialize storage and get storage key"""
+    global storage_key
+    if storage_key:
+        return storage_key
+    if not EMERGENT_KEY:
+        raise Exception("EMERGENT_LLM_KEY not configured")
+    resp = requests.post(f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY}, timeout=30)
+    resp.raise_for_status()
+    storage_key = resp.json()["storage_key"]
+    return storage_key
+
+def put_object(path: str, data: bytes, content_type: str) -> dict:
+    """Upload file to storage"""
+    key = init_storage()
+    resp = requests.put(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key, "Content-Type": content_type},
+        data=data, timeout=120
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+def get_object(path: str) -> tuple:
+    """Download file from storage"""
+    key = init_storage()
+    resp = requests.get(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key}, timeout=60
+    )
+    resp.raise_for_status()
+    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
+
+MIME_TYPES = {
+    "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png",
+    "gif": "image/gif", "webp": "image/webp", "pdf": "application/pdf",
+    "json": "application/json", "csv": "text/csv", "txt": "text/plain",
+    "zip": "application/zip", "mp4": "video/mp4", "mp3": "audio/mpeg",
+    "psd": "image/vnd.adobe.photoshop", "ai": "application/illustrator",
+    "xmp": "application/octet-stream", "lrtemplate": "application/octet-stream"
+}
+
+def generate_referral_code() -> str:
+    """Generate unique referral code"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 # ==================== MODELS ====================
 
@@ -43,6 +120,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    referral_code: Optional[str] = None  # Code of the user who referred them
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -58,6 +136,7 @@ class UserResponse(BaseModel):
     avatar: Optional[str] = None
     bio: Optional[str] = None
     username: Optional[str] = None
+    referral_code: Optional[str] = None  # User's own referral code
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -79,6 +158,33 @@ class CreatorProfile(BaseModel):
     is_verified: bool = False
     store_theme: Dict[str, Any] = {}
     created_at: str
+    connected_accounts: Dict[str, Any] = {}  # OAuth connected accounts
+
+class SocialAccountConnect(BaseModel):
+    platform: str  # youtube, instagram, tiktok
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    # Manual input fields
+    follower_count: Optional[int] = None
+    profile_url: Optional[str] = None
+    username: Optional[str] = None
+
+class FileUploadResponse(BaseModel):
+    id: str
+    path: str
+    original_filename: str
+    content_type: str
+    size: int
+    download_url: str
+
+class ReferralStats(BaseModel):
+    referral_code: str
+    total_referrals: int
+    successful_referrals: int
+    total_earnings: float
+    pending_earnings: float
+    milestone_bonuses: float
+    referred_users: List[Dict[str, Any]] = []
 
 class ProductCreate(BaseModel):
     title: str
@@ -252,6 +358,14 @@ async def register(user_data: UserCreate):
     
     user_id = str(uuid.uuid4())
     username = user_data.email.split('@')[0] + str(uuid.uuid4())[:4]
+    user_referral_code = generate_referral_code()
+    
+    # Check if referred by someone
+    referred_by = None
+    if user_data.referral_code:
+        referrer = await db.users.find_one({"referral_code": user_data.referral_code})
+        if referrer:
+            referred_by = referrer["id"]
     
     user_doc = {
         "id": user_id,
@@ -262,10 +376,53 @@ async def register(user_data: UserCreate):
         "username": username,
         "avatar": None,
         "bio": None,
+        "referral_code": user_referral_code,
+        "referred_by": referred_by,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.users.insert_one(user_doc)
+    
+    # Track referral if applicable
+    if referred_by:
+        referral_doc = {
+            "id": str(uuid.uuid4()),
+            "referrer_id": referred_by,
+            "referred_user_id": user_id,
+            "referred_user_email": user_data.email,
+            "referred_user_name": user_data.name,
+            "status": "signed_up",
+            "signup_bonus_paid": False,
+            "earnings_tracked_until": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
+            "total_commission_earned": 0.0,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.referrals.insert_one(referral_doc)
+        
+        # Credit signup bonus to referrer
+        await db.referral_earnings.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": referred_by,
+            "referral_id": referral_doc["id"],
+            "type": "signup_bonus",
+            "amount": REFERRAL_SIGNUP_BONUS,
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        # Check for milestone bonuses
+        referral_count = await db.referrals.count_documents({"referrer_id": referred_by})
+        if referral_count in REFERRAL_MILESTONES:
+            await db.referral_earnings.insert_one({
+                "id": str(uuid.uuid4()),
+                "user_id": referred_by,
+                "referral_id": None,
+                "type": "milestone_bonus",
+                "milestone": referral_count,
+                "amount": REFERRAL_MILESTONES[referral_count],
+                "status": "pending",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
     
     # Create profile based on role
     if user_data.role == "creator":
@@ -282,6 +439,7 @@ async def register(user_data: UserCreate):
             "location": None,
             "is_verified": False,
             "store_theme": {"background": "#0D0D1A", "accent": "#6C5CE7"},
+            "connected_accounts": {},
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.creator_profiles.insert_one(creator_profile)
@@ -321,7 +479,8 @@ async def register(user_data: UserCreate):
             name=user_data.name,
             role=user_data.role,
             created_at=user_doc["created_at"],
-            username=username
+            username=username,
+            referral_code=user_referral_code
         )
     )
 
@@ -343,7 +502,8 @@ async def login(credentials: UserLogin):
             created_at=user["created_at"],
             avatar=user.get("avatar"),
             bio=user.get("bio"),
-            username=user.get("username")
+            username=user.get("username"),
+            referral_code=user.get("referral_code")
         )
     )
 
@@ -357,7 +517,8 @@ async def get_me(user: dict = Depends(get_current_user)):
         created_at=user["created_at"],
         avatar=user.get("avatar"),
         bio=user.get("bio"),
-        username=user.get("username")
+        username=user.get("username"),
+        referral_code=user.get("referral_code")
     )
 
 # ==================== CREATOR ROUTES ====================
